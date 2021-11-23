@@ -1,0 +1,41 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Hello BarController!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+    <h1>Hello {{ controller_name }}! ✅</h1>
+
+    <table>
+        <thead>
+            <tr>
+                {% for property_title in fields %} 
+                    <td>{{ property_title }}</td>
+                {% endfor %}
+                 <td>Actions</td>
+            </tr>
+        </thead> 
+        <tbody>
+            {% for bar in bars %}
+                <tr>
+                    <td>{{ bar.id }}</td>
+                    <td>{{ bar.name }}</td>
+                    <td>{{ bar.city }}</td>
+                    <td>{{ bar.location }}</td>
+                    <td>{{ bar.postcode }}</td>
+                    <td>
+                       <a href="{{ path('bar_id', {'id': bar.id}) }}">Détail</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('bar_create') }}">Créer un bar</a>
+</div>
+{% endblock %}
