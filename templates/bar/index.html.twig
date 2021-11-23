@@ -9,8 +9,6 @@
 </style>
 
 <div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
     <table>
         <thead>
             <tr>
@@ -29,7 +27,8 @@
                     <td>{{ bar.location }}</td>
                     <td>{{ bar.postcode }}</td>
                     <td>
-                       <a href="{{ path('bar_id', {'id': bar.id}) }}">Détail</a>
+                       <a href="{{ path('bar_id', {'id': bar.id }) }}">Editer</a>
+                       <a href="{{ path('bar_delete', {'id': bar.id, 'token': csrf_token('delete_bar')}) }}">Supprimer</a>
                     </td>
                 </tr>
             {% endfor %}

@@ -4,42 +4,54 @@ namespace App\Controller;
 
 use App\Entity\Bar;
 use App\Form\BarType;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 
+#[Route('/bar')]
 class BarController extends AbstractController
 {
-    #[Route('/bar', name: 'bar')]
+    #[Route('', name: 'bars')]
     public function index(): Response
     {
 
         $repository = $this->getDoctrine()->getRepository(Bar::class);
         $mappings = $this->getDoctrine()->getManager()->getClassMetadata(Bar::class);
         $barColumnsNames = $mappings->getFieldNames();
-        $bars = $repository->findAll();
+        $bars = $repository->findBy(array(), array('id' => 'ASC'));
 
         return $this->render('bar/index.html.twig', [
-            'controller_name' => 'BarController',
             'bars' => $bars,
             'fields' => $barColumnsNames,
         ]);
     }
 
-    #[Route('/bar/{id}', name: 'bar_id', requirements: ['id' => '\d+'])]
-    public function viewId($id): Response
+    #[Route('/{id}', name: 'bar_id', requirements: ['id' => '\d+'])]
+    public function viewId(Request $request, $id): Response
     {
         $repository = $this->getDoctrine()->getRepository(Bar::class);
         $bar = $repository->find($id);
+        $form = $this->createForm(BarType::class, $bar);
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+
+            $em->persist($bar);
+            $em->flush();
+
+            return $this->redirectToRoute('bars');
+        }
 
         return $this->render('bar/bar.html.twig', [
             'controller_name' => 'BarController',
-            'bar' => $bar,
+            'form' => $form->createView(),
         ]);
     }
 
-    #[Route('/bar/create', name: 'bar_create')]
+    #[Route('/create', name: 'bar_create')]
     public function create(Request $request): Response
     {
         $bar = new Bar();
@@ -57,8 +69,23 @@ class BarController extends AbstractController
             ]);
         }
 
-        return $this->render('bar/create.html.twig', [
+        return $this->render('bar/bar.html.twig', [
             'form' => $form->createView()
         ]);
+    }
+
+    #[Route('/delete/{id}/{token}', name: 'bar_delete')]
+    public function delete($id, $token): Response
+    {
+
+        if ($this->isCsrfTokenValid('delete_bar', $token)) {
+            $em = $this->getDoctrine()->getManager();
+            $bar = $em->getRepository(Bar::class)->find($id);
+            $em->remove($bar);
+            $em->flush();
+            return $this->redirectToRoute('bars');
+        }
+
+        throw new Exception('Invalid token !!!!');
     }
 }
